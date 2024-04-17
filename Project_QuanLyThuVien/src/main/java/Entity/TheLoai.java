@@ -1,22 +1,28 @@
-package Entity;
+package entity;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
-public class TheLoai {
+@NamedQueries({
+        @NamedQuery(name = "TheLoai.findAll", query = "SELECT tl FROM TheLoai tl"),
+        @NamedQuery(name = "TheLoai.findByTenTheLoai", query = "SELECT tl FROM TheLoai tl WHERE tl.tenTheLoai like lower(:tenTheLoai)"),
+        @NamedQuery(name = "TheLoai.existsById", query = "SELECT (count(tl)>0) FROM TheLoai tl WHERE tl.maTheLoai = :maTheLoai")
+})
+public class TheLoai implements Serializable {
     @Id
     @Column(name = "MaTheLoai", columnDefinition = "int")
     private int maTheLoai;
     @Column(name = "TenTheLoai", columnDefinition = "nvarchar(255)")
     private String tenTheLoai;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MaDanhMuc")
     private DanhMuc danhMuc;
 
-    @OneToMany(mappedBy = "theLoai", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "theLoai", fetch = FetchType.EAGER)
     private Set<SanPham> sanPhams;
     public TheLoai() {
     }

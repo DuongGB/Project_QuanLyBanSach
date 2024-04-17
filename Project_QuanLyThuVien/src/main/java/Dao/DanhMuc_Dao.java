@@ -2,14 +2,16 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package Dao;
+package dao;
 
-import ConnectDB.ConnectDB;
-import Entity.DanhMuc;
+import bus.DanhMuc_Bus;
+import entity.DanhMuc;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,14 +24,15 @@ import java.util.List;
  *
  * @author PC
  */
-public class DanhMuc_Dao {
+public class DanhMuc_Dao extends UnicastRemoteObject implements DanhMuc_Bus {
     private EntityManager em;
 
-    public DanhMuc_Dao() {
+    public DanhMuc_Dao() throws RemoteException {
         em= Persistence.createEntityManagerFactory("JPA_MSSQL").createEntityManager();
     }
 
-    public boolean themDanhMuc(String tenDanhMuc){
+    @Override
+    public boolean themDanhMuc(String tenDanhMuc) throws RemoteException{
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -44,21 +47,8 @@ public class DanhMuc_Dao {
         }
         return false;
     }
-//    public boolean themDanhMuc(String tenDanhMuc) {
-//        Connection conn = ConnectDB.getConnection();
-//        String insertQuery = "INSERT INTO DanhMucSanPham (TenDanhMuc) VALUES (?)";
-//
-//        try {
-//            PreparedStatement prestm = conn.prepareStatement(insertQuery);
-//            prestm.setString(1, tenDanhMuc);
-//            return (prestm.executeUpdate() > 0);
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return false;
-//    }
-
-    public boolean updateDanhMuc(DanhMuc danhMuc) {
+    @Override
+    public boolean updateDanhMuc(DanhMuc danhMuc) throws RemoteException{
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -71,74 +61,15 @@ public class DanhMuc_Dao {
         }
         return false;
     }
-//    public boolean updateDanhMuc(DanhMuc danhMuc) {
-//        Connection conn = ConnectDB.getConnection();
-//        String updateQuery = "UPDATE DanhMucSanPham SET tenDanhMuc = ? WHERE maDanhMuc = ?";
-//
-//        try {
-//            PreparedStatement prestm = conn.prepareStatement(updateQuery);
-//            prestm.setString(1, danhMuc.getTenDanhMuc());
-//            prestm.setInt(2, danhMuc.getMaDanhMuc());
-//            return (prestm.executeUpdate() > 0);
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return false;
-//    }
-    public List<DanhMuc> timKiemDanhMuc(String searchTerm){
+    @Override
+    public List<DanhMuc> timKiemDanhMuc(String searchTerm) throws RemoteException{
         return em.createNamedQuery("DanhMuc.findByTenDanhMuc", DanhMuc.class).setParameter("tenDanhMuc", "%"+searchTerm+"%").getResultList();
     }
-//    public ArrayList<DanhMuc> timKiemDanhMuc(String searchTerm) {
-//        ArrayList<DanhMuc> dsDanhMuc = new ArrayList<>();
-//        Connection conn = ConnectDB.getConnection();
-//        String searchQuery = "SELECT * FROM DanhMucSanPham WHERE [dbo].[RemoveNonASCII](LOWER(tenDanhMuc)) LIKE ? OR (LOWER(tenDanhMuc)) LIKE ?";
-//
-//        try {
-//            PreparedStatement prestm = conn.prepareStatement(searchQuery);
-//            prestm.setString(1, "%" + searchTerm + "%");
-//            prestm.setString(2, "%" + searchTerm + "%");
-//            ResultSet rs = prestm.executeQuery();
-//
-//            while (rs.next()) {
-//                int maDanhMuc = rs.getInt("maDanhMuc");
-//                String tenDanhMuc = rs.getString("tenDanhMuc");
-//                DanhMuc danhMuc = new DanhMuc(maDanhMuc, tenDanhMuc);
-//                dsDanhMuc.add(danhMuc);
-//            }
-//
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return dsDanhMuc;
-//    }
-
-    public List<DanhMuc> getAllDanhMuc() {
+    @Override
+    public List<DanhMuc> getAllDanhMuc() throws RemoteException{
         return em.createNamedQuery("DanhMuc.findAll", DanhMuc.class).getResultList();
     }
-//    public ArrayList<DanhMuc> getAllDanhMuc() {
-//        Connection conn = ConnectDB.getConnection();
-//        ArrayList<DanhMuc> dsDanhMuc = new ArrayList<>();
-//        String selectQuery = "SELECT * FROM DanhMucSanPham";
-//
-//        try {
-//            Statement stm = conn.createStatement();
-//            ResultSet result = stm.executeQuery(selectQuery);
-//
-//            while (result.next()) {
-//
-//                int maDanhMuc = result.getInt("maDanhMuc");
-//                String tenDanhMuc = result.getString("tenDanhMuc");
-//                DanhMuc danhMuc = new DanhMuc(maDanhMuc, tenDanhMuc);
-//                dsDanhMuc.add(danhMuc);
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return dsDanhMuc;
-//    }
-    public void close() {
+    public void close() throws RemoteException{
         em.close();
     }
 }

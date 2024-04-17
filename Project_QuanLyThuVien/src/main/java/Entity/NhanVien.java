@@ -1,16 +1,21 @@
-package Entity;
+package entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
-public class NhanVien {
+@NamedQueries({
+        @NamedQuery(name = "NhanVien.findAll", query = "SELECT nv FROM NhanVien nv"),
+        @NamedQuery(name = "NhanVien.findNV", query = "SELECT nv FROM NhanVien nv WHERE nv.maNhanVien like lower(:maNhanVien) or nv.tenNhanVien like lower(:tenNhanVien) or nv.soDienThoai like lower(:soDienThoai) or nv.luongCoBan = :luongCoBan"),
+        @NamedQuery(name="NhanVien.checkSDT", query = "SELECT (count(nv)) FROM NhanVien nv WHERE nv.soDienThoai = :soDienThoai"),
+        @NamedQuery(name="NhanVien.countNV", query = "SELECT (count(nv)) FROM NhanVien nv"),
+        @NamedQuery(name="NhanVien.findNVByMaNV", query = "SELECT nv FROM NhanVien nv WHERE nv.maNhanVien = :maNhanVien"),
+})
+public class NhanVien implements Serializable {
     @Id
     @Column(name = "MaNhanVien", columnDefinition = "nchar(15)")
     private String maNhanVien;
@@ -34,7 +39,7 @@ public class NhanVien {
     private Date ngayVaoLam;
 
     //Tạo quan hệ 1-n với bảng HoaDon
-    @OneToMany(mappedBy = "nhanVien")
+    @OneToMany(mappedBy = "nhanVien", fetch = FetchType.EAGER)
     private Set<HoaDon> hoaDons;
     public NhanVien() {
     }

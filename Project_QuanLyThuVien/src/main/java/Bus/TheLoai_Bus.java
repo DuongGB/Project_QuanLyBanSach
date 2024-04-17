@@ -1,36 +1,20 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package Bus;
+package bus;
 
-import Dao.TheLoai_Dao;
-import Entity.TheLoai;
+import dao.TheLoai_Dao;
+import entity.TheLoai;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.List;
 
-/**
- *
- * @author ngoct
- */
-public class TheLoai_Bus {
-     private final TheLoai_Dao theLoai_Dao;
-    public TheLoai_Bus() {
-        theLoai_Dao = new TheLoai_Dao();
-    }
+public interface TheLoai_Bus extends Remote {
+
+    public boolean themTheLoai(String tenTheLoai, int maDanhMuc) throws RemoteException;
     
-    public boolean themTheLoai(String tenDanhMuc, int maDanhMuc) {
-        return theLoai_Dao.themTheLoai(tenDanhMuc, maDanhMuc);
-    }
+    public boolean updateTheLoai(TheLoai theLoai) throws RemoteException;
     
-    public boolean updateTheLoai(TheLoai theLoai) {
-        return theLoai_Dao.updateTheLoai(theLoai);
-    }
+    public List<TheLoai> getAllTheLoai() throws RemoteException;
     
-    public ArrayList<TheLoai> getAllTheLoai() {
-        return theLoai_Dao.getAllTheLoai();
-    }
-    
-    public ArrayList<TheLoai> timKiemTheLoai(String queryParams) {
-        return theLoai_Dao.timKiemTheLoai(queryParams);
-    }
+    public List<TheLoai> timKiemTheLoai(String queryParams) throws RemoteException;
 }

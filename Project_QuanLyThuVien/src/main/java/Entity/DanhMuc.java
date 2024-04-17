@@ -1,7 +1,8 @@
-package Entity;
+package entity;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 
@@ -9,16 +10,16 @@ import java.util.Set;
 @Table(name = "DanhMucSanPham")
 @NamedQueries({
         @NamedQuery(name = "DanhMuc.findAll", query = "SELECT d FROM DanhMuc d"),
-        @NamedQuery(name = "DanhMuc.findByTenDanhMuc", query = "SELECT d FROM DanhMuc d WHERE d.tenDanhMuc like :tenDanhMuc"),
+        @NamedQuery(name = "DanhMuc.findByTenDanhMuc", query = "SELECT d FROM DanhMuc d WHERE d.tenDanhMuc like lower(:tenDanhMuc) "),
 })
-public class DanhMuc {
+public class DanhMuc implements Serializable {
     @Id
     @Column(name = "MaDanhMuc", columnDefinition = "int")
     private int maDanhMuc;
     @Column(name = "TenDanhMuc", columnDefinition = "nvarchar(255)")
     private String tenDanhMuc;
 
-    @OneToMany(mappedBy = "danhMuc", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "danhMuc", fetch = FetchType.EAGER)
     private Set<TheLoai> theLoais;
     public DanhMuc() {
     }

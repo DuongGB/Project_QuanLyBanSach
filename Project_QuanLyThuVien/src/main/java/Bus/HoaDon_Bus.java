@@ -1,46 +1,23 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package Bus;
+package bus;
 
-import Dao.HoaDon_Dao;
-import Entity.HoaDon;
+import dao.HoaDon_Dao;
+import entity.HoaDon;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-/**
- *
- * @author ngoct
- */
-public class HoaDon_Bus {
-    private final HoaDon_Dao hd_Dao;
-    public HoaDon_Bus() {
-        hd_Dao = new HoaDon_Dao();
-    }
-    public boolean themHD(HoaDon hd) {
-        return hd_Dao.themHoaDon(hd);
-    }
-    public ArrayList<HoaDon> getAllHD() {
-        return hd_Dao.getAllHD();
-    }
-    public int getThuTuHoaDon() throws SQLException {
-        return hd_Dao.getThuTuHoaDon();
-    }
-    public ArrayList<HoaDon> getHoaDonByDateRange(Date fromDate, Date toDate, String maNV) {
-        return hd_Dao.getHoaDonByDateRange(fromDate, toDate, maNV);
-    }
-    public ArrayList<HoaDon> getHoaDonByDate(Date date, String maNV) {
-        return hd_Dao.getHoaDonByDate(date, maNV);
-    }
-    public ArrayList<HoaDon> getHoaDonByMonthYear(int month, int year, String maNV) {
-        return hd_Dao.getHoaDonByMonthYear(month, year, maNV);
-    }
-    public ArrayList<HoaDon> getHoaDonByNhanVien(String maNV) {
-        return hd_Dao.getAllHDByNhanVien(maNV);
-    }
-    public ArrayList<HoaDon> timHoaDon(String thongTin, String maNV) {
-        return hd_Dao.timKiemHD(thongTin, maNV);
-    }
+public interface HoaDon_Bus extends Remote {
+
+    public boolean themHD(HoaDon hd) throws RemoteException;
+    public List<HoaDon> getAllHD() throws RemoteException;
+    public int getThuTuHoaDon() throws RemoteException;
+    public List<HoaDon> getHoaDonByDateRange(Date fromDate, Date toDate, String maNV) throws RemoteException;
+    public List<HoaDon> getHoaDonByDate(Date date, String maNV) throws RemoteException;
+    public List<HoaDon> getHoaDonByMonthYear(int month, int year, String maNV) throws RemoteException;
+    public List<HoaDon> getHoaDonByNhanVien(String maNV) throws RemoteException;
+    public List<HoaDon> timHoaDon(String thongTin, String maNV) throws RemoteException;
 }

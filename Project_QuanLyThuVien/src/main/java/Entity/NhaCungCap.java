@@ -1,12 +1,18 @@
-package Entity;
+package entity;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
-public class NhaCungCap {
+@NamedQueries({
+        @NamedQuery(name = "NhaCungCap.findAll", query = "SELECT n FROM NhaCungCap n"),
+        @NamedQuery(name = "NhaCungCap.find", query = "SELECT ncc FROM NhaCungCap ncc WHERE ncc.maNhaCungCap LIKE (LOWER(:maNhaCungCap)) OR ncc.tenNhaCungCap like LOWER(:tenNhaCungCap) or ncc.diaChi LIKE LOWER(:diaChi) OR ncc.soDienThoai LIKE LOWER(:soDienThoai)"),
+        @NamedQuery(name = "NhaCungCap.countNCC", query = "SELECT COUNT(n) FROM NhaCungCap n")
+})
+public class NhaCungCap implements Serializable {
     @Id
     @Column(name = "MaNhaCungCap", columnDefinition = "nchar(15)")
     private String maNhaCungCap;
@@ -17,7 +23,7 @@ public class NhaCungCap {
     @Column(name = "SoDienThoai", columnDefinition = "varchar(20)")
     private String soDienThoai;
 
-    @OneToMany(mappedBy = "nhaCungCap", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "nhaCungCap", fetch = FetchType.EAGER)
     private Set<SanPham> sanPhams;
     public NhaCungCap() {
     }

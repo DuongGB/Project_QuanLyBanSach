@@ -2,33 +2,34 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package Dao;
+package dao;
 
-import ConnectDB.ConnectDB;
-import Entity.DanhMuc;
-import Entity.TheLoai;
+import bus.TheLoai_Bus;
+import entity.DanhMuc;
+import entity.TheLoai;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
-/**
- *
- * @author PC
- */
-public class TheLoai_Dao {
+
+public class TheLoai_Dao extends UnicastRemoteObject implements TheLoai_Bus {
     private EntityManager em;
 
-    public TheLoai_Dao() {
+    public TheLoai_Dao() throws RemoteException {
         em= Persistence.createEntityManagerFactory("JPA_MSSQL").createEntityManager();
     }
-    public boolean themTheLoai(String tenTheLoai, int maDanhMuc) {
+    @Override
+    public boolean themTheLoai(String tenTheLoai, int maDanhMuc) throws RemoteException{
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -45,22 +46,9 @@ public class TheLoai_Dao {
         }
         return false;
     }
-//    public boolean themTheLoai(String tenTheLoai, int maDanhMuc) {
-//        Connection conn = ConnectDB.getConnection();
-//        String insertQuery = "INSERT INTO TheLoai (tenTheLoai, maDanhMuc) VALUES (?, ?)";
-//
-//        try {
-//            PreparedStatement prestm = conn.prepareStatement(insertQuery);
-//            prestm.setString(1, tenTheLoai);
-//            prestm.setInt(2, maDanhMuc);
-//            return (prestm.executeUpdate() > 0);
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return false;
-//    }
 
-    public boolean updateTheLoai(TheLoai theLoai) {
+    @Override
+    public boolean updateTheLoai(TheLoai theLoai) throws RemoteException{
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -73,68 +61,13 @@ public class TheLoai_Dao {
         }
         return false;
     }
-//    public boolean updateTheLoai(TheLoai theLoai) {
-//        Connection conn = ConnectDB.getConnection();
-//        String updateQuery = "UPDATE TheLoai SET tenTheLoai = ?, maDanhMuc = ? WHERE maTheLoai = ?";
-//
-//        try {
-//            PreparedStatement prestm = conn.prepareStatement(updateQuery);
-//            prestm.setString(1, theLoai.getTenTheLoai());
-//            prestm.setInt(2, theLoai.getDanhMuc().getMaDanhMuc());
-//            prestm.setInt(3, theLoai.getMaTheLoai());
-//            return (prestm.executeUpdate() > 0);
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return false;
-//    }
+    @Override
+    public List<TheLoai> timKiemTheLoai(String queryParams) throws RemoteException{
+        return em.createNamedQuery("TheLoai.findByTenTheLoai", TheLoai.class).setParameter("tenTheLoai", "%"+queryParams+"%").getResultList();
 
-    public ArrayList<TheLoai> timKiemTheLoai(String searchTerm) {
-        ArrayList<TheLoai> dsTheLoai = new ArrayList<>();
-        Connection conn = ConnectDB.getConnection();
-        String searchQuery = "SELECT * FROM TheLoai t JOIN DanhMucSanPham d ON t.MaDanhMuc = d.MaDanhMuc WHERE [dbo].[RemoveNonASCII](LOWER(TenTheLoai)) LIKE ? OR (LOWER(TenTheLoai)) LIKE ?";
-
-        try {
-            PreparedStatement prestm = conn.prepareStatement(searchQuery);
-            prestm.setString(1, "%" + searchTerm + "%");
-            prestm.setString(2, "%" + searchTerm + "%");
-            ResultSet rs = prestm.executeQuery();
-
-            while (rs.next()) {
-                int maTheLoai = rs.getInt("maTheLoai");
-                String tenTheLoai = rs.getString("tenTheLoai");
-                DanhMuc danhMuc = new DanhMuc(rs.getInt("MaDanhMuc"), rs.getString("TenDanhMuc"));
-                TheLoai theLoai = new TheLoai(maTheLoai, tenTheLoai, danhMuc);
-                dsTheLoai.add(theLoai);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return dsTheLoai;
     }
-
-    public ArrayList<TheLoai> getAllTheLoai() {
-        Connection conn = ConnectDB.getConnection();
-        ArrayList<TheLoai> dsTheLoai = new ArrayList<>();
-        String selectQuery = "SELECT * FROM TheLoai t JOIN DanhMucSanPham d ON t.MaDanhMuc = d.MaDanhMuc";
-
-        try {
-            Statement stm = conn.createStatement();
-            ResultSet result = stm.executeQuery(selectQuery);
-
-            while (result.next()) {
-                int maTheLoai = result.getInt("maTheLoai");
-                String tenTheLoai = result.getString("tenTheLoai");
-                DanhMuc danhMuc = new DanhMuc(result.getInt("MaDanhMuc"), result.getString("TenDanhMuc"));
-                TheLoai theLoai = new TheLoai(maTheLoai, tenTheLoai, danhMuc);
-                dsTheLoai.add(theLoai);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return dsTheLoai;
+    @Override
+    public List<TheLoai> getAllTheLoai() throws RemoteException{
+        return em.createNamedQuery("TheLoai.findAll", TheLoai.class).getResultList();
     }
 }

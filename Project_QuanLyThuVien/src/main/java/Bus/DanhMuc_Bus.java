@@ -1,37 +1,20 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package Bus;
+package bus;
 
-import Dao.DanhMuc_Dao;
-import Entity.DanhMuc;
+import dao.DanhMuc_Dao;
+import entity.DanhMuc;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @author ngoct
- */
-public class DanhMuc_Bus {
-    private final DanhMuc_Dao danhMuc_Dao;
-    public DanhMuc_Bus() {
-        danhMuc_Dao = new DanhMuc_Dao();
-    }
+public interface DanhMuc_Bus extends Remote {
+
+    public boolean themDanhMuc(String tenDanhMuc) throws RemoteException;
     
-    public boolean themDanhMuc(String tenDanhMuc) {
-        return danhMuc_Dao.themDanhMuc(tenDanhMuc);
-    }
+    public boolean updateDanhMuc(DanhMuc danhMuc) throws RemoteException;
     
-    public boolean updateDanhMuc(DanhMuc danhMuc) {
-        return danhMuc_Dao.updateDanhMuc(danhMuc);
-    }
+    public List<DanhMuc> getAllDanhMuc() throws RemoteException;
     
-    public List<DanhMuc> getAllDanhMuc() {
-        return danhMuc_Dao.getAllDanhMuc();
-    }
-    
-    public List<DanhMuc> timKiemDanhMuc(String queryParams) {
-        return danhMuc_Dao.timKiemDanhMuc(queryParams);
-    }
+    public List<DanhMuc> timKiemDanhMuc(String queryParams) throws RemoteException;
 }

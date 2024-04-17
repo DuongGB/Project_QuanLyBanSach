@@ -1,44 +1,23 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package Bus;
+package bus;
 
-import Dao.TacGia_Dao;
-import Entity.TacGia;
+import dao.TacGia_Dao;
+import entity.TacGia;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @author ngoct
- */
-public class TacGia_Bus {
-
-    private final TacGia_Dao tg_Dao;
-
-    public TacGia_Bus() {
-        tg_Dao = new TacGia_Dao();
-    }
+public interface TacGia_Bus extends Remote {
     
-    public int getThuTuTacGia() throws SQLException {
-        return tg_Dao.getThuTuTacGia();
-    }
+    public int getThuTuTacGia() throws RemoteException;
     
-    public boolean themTacGia(TacGia tg) {
-        return tg_Dao.themTacGia(tg);
-    }
+    public boolean themTacGia(TacGia tg) throws RemoteException;
     
-    public boolean updateTacGia(TacGia tg) {
-        return tg_Dao.updateTacGia(tg);
-    }
+    public boolean updateTacGia(TacGia tg) throws RemoteException;
     
-    public List<TacGia> getAllTacGia() {
-        return tg_Dao.getAllTacGia();
-    }
+    public List<TacGia> getAllTacGia() throws RemoteException;
     
-    public List<TacGia> timKiemTacGia(String queryParams) {
-        return tg_Dao.timKiemTacGia(queryParams);
-    }
+    public List<TacGia> timKiemTacGia(String queryParams) throws RemoteException;
 }

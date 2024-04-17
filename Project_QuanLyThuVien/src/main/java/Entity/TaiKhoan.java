@@ -1,11 +1,17 @@
-package Entity;
+package entity;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
-public class TaiKhoan {
+@NamedQueries({
+        @NamedQuery(name = "TaiKhoan.findAll", query = "SELECT tk FROM TaiKhoan tk"),
+        @NamedQuery(name = "TaiKhoan.findByTenTaiKhoan", query = "SELECT tk FROM TaiKhoan tk WHERE tk.tenTaiKhoan = :tenTaiKhoan"),
+        @NamedQuery(name = "TaiKhoan.findByRole", query = "SELECT tk FROM TaiKhoan tk WHERE tk.role = :role")
+})
+public class TaiKhoan implements Serializable {
     @Id
     @Column(name = "TenTaiKhoan", columnDefinition = "varchar(255)")
     private String tenTaiKhoan;

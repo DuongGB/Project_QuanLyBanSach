@@ -1,13 +1,20 @@
-package Entity;
+package entity;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
-public class HoaDon {
+@NamedQueries({
+        @NamedQuery(name = "HoaDon.getThuTuHoaDon", query = "select count(hd) from HoaDon hd"),
+        @NamedQuery(name = "HoaDon.getAllHoaDon", query = "select hd from HoaDon hd"),
+        @NamedQuery(name = "HoaDon.getAllHDByNhanVien", query = "select hd from HoaDon hd where hd.nhanVien.maNhanVien=:maNhanVien"),
+        @NamedQuery(name = "HoaDon.findHoaDon", query = "SELECT hd FROM HoaDon hd JOIN hd.nhanVien nv WHERE LOWER(hd.maHoaDon) LIKE LOWER(:query) AND (LOWER(hd.nhanVien.maNhanVien) LIKE LOWER(:maNV) OR LOWER(nv.tenNhanVien) LIKE LOWER(:query))")
+})
+public class HoaDon implements Serializable {
     @Id
     @Column(name = "MaHoaDon", columnDefinition = "nchar(15)")
     private String maHoaDon;
@@ -15,18 +22,18 @@ public class HoaDon {
     private Date ngayLap;
 
     //Tạo quan hệ n-1 với bảng KhachHang
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MaKhachHang")
     private KhachHang khachHang;
 
     //Tạo quan hệ n-1 với bảng NhanVien
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MaNhanVien")
     private NhanVien nhanVien;
     @Column(name = "GiamGia", columnDefinition = "float")
     private double giamGia;
 
-    @OneToMany(mappedBy = "hoaDon", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "hoaDon", fetch = FetchType.EAGER)
     private Set<ChiTietHoaDon> chiTietHoaDons;
 
     public HoaDon() {

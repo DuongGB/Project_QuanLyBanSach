@@ -1,15 +1,20 @@
-package Entity;
+package entity;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @NamedQueries({
-        @NamedQuery(name = "SanPham.findAll", query = "SELECT sp FROM SanPham sp"),
+        @NamedQuery(name = "SanPham.findAll", query = "SELECT sp FROM SanPham sp JOIN NhaCungCap n ON sp.nhaCungCap.maNhaCungCap = n.maNhaCungCap JOIN TheLoai tl ON sp.theLoai.maTheLoai = tl.maTheLoai JOIN DanhMuc d ON tl.danhMuc.maDanhMuc = d.maDanhMuc"),
+//        @NamedQuery(name = "SanPham.findSPByMaSanPham", query = "SELECT sp FROM SanPham sp WHERE sp.maSanPham = :maSanPham"),
+        @NamedQuery(name = "SanPham.find",query = "SELECT sp FROM SanPham sp JOIN NhaCungCap n ON sp.nhaCungCap.maNhaCungCap = n.maNhaCungCap JOIN TheLoai tl ON sp.theLoai.maTheLoai = tl.maTheLoai JOIN DanhMuc d ON tl.danhMuc.maDanhMuc = d.maDanhMuc WHERE lower(sp.tenSanPham) like lower(:tenSanPham) or lower(sp.maSanPham) like lower(:maSanPham) "),
+        @NamedQuery(name = "SanPham.count",query = "SELECT COUNT(sp) FROM SanPham sp"),
+        @NamedQuery(name=   "SanPham.getSPByMaSP",query = "SELECT sp FROM SanPham sp JOIN NhaCungCap n ON sp.nhaCungCap.maNhaCungCap = n.maNhaCungCap JOIN TheLoai tl ON sp.theLoai.maTheLoai = tl.maTheLoai JOIN DanhMuc d ON tl.danhMuc.maDanhMuc = d.maDanhMuc WHERE sp.maSanPham = :maSanPham"),
 })
-public class SanPham {
+public class SanPham implements Serializable {
     @Id
     @Column(name = "MaSanPham", columnDefinition = "nchar(15)")
     private String maSanPham;
@@ -19,20 +24,20 @@ public class SanPham {
     private double giaMua;
     @Column(name = "HinhAnh", columnDefinition = "varchar(255)")
     private String hinhAnh;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MaNhaCungCap")
     private NhaCungCap nhaCungCap;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MaTacGia")
     private TacGia tacGia;
     @Column(name = "SoTrang", columnDefinition = "int")
     private int soTrang;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MaTheLoai")
     private TheLoai theLoai;
     @Column(name = "MoTa", columnDefinition = "nvarchar(255)")
     private String moTaSanPham;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MaNXB")
     private NhaXuatBan nhaXuatBan;
     @Column(name = "SoLuongTon", columnDefinition = "int")
@@ -40,13 +45,21 @@ public class SanPham {
     @Column(name = "VAT", columnDefinition = "float")
     private double vat;
 
-    @OneToMany(mappedBy = "sanPham", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "sanPham", fetch = FetchType.EAGER)
     private Set<ChiTietHoaDon> chiTietHoaDons;
     public SanPham() {
     }
 
     public SanPham(String maSanPham) {
         this.maSanPham = maSanPham;
+    }
+
+    public SanPham(String maSanPham, String tenSanPham, double giaMua, int soLuongTon, double vat) {
+        this.maSanPham = maSanPham;
+        this.tenSanPham = tenSanPham;
+        this.giaMua = giaMua;
+        this.soLuongTon = soLuongTon;
+        this.vat = vat;
     }
 
     public SanPham(String maSanPham, String tenSanPham, double giaMua, String hinhAnh, NhaCungCap nhaCungCap, TacGia tacGia, int soTrang, TheLoai theLoai, String moTaSanPham, NhaXuatBan nhaXuatBan, int soLuongTon, double vat) {
@@ -192,7 +205,19 @@ public class SanPham {
 
     @Override
     public String toString() {
-        return "SanPham{" + "maSanPham=" + maSanPham + ", tenSanPham=" + tenSanPham + ", giaMua=" + giaMua + ", hinhAnh=" + hinhAnh + ", nhaCungCap=" + nhaCungCap + ", tacGia=" + tacGia + ", soTrang=" + soTrang + ", theLoai=" + theLoai + ", moTaSanPham=" + moTaSanPham + ", nhaXuatBan=" + nhaXuatBan + '}';
+        return "SanPham{" +
+                "maSanPham='" + maSanPham + '\'' +
+                ", tenSanPham='" + tenSanPham + '\'' +
+                ", giaMua=" + giaMua +
+                ", hinhAnh='" + hinhAnh + '\'' +
+                ", nhaCungCap=" + nhaCungCap +
+                ", tacGia=" + tacGia +
+                ", soTrang=" + soTrang +
+                ", theLoai=" + theLoai +
+                ", moTaSanPham='" + moTaSanPham + '\'' +
+                ", nhaXuatBan=" + nhaXuatBan +
+                ", soLuongTon=" + soLuongTon +
+                ", vat=" + vat +
+                '}';
     }
-    
 }

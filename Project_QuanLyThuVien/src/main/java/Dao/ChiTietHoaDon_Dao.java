@@ -1,132 +1,83 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package Dao;
+package dao;
 
-import ConnectDB.ConnectDB;
-import Entity.ChiTietHoaDon;
-import Entity.HoaDon;
-import Entity.SanPham;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.Date;
 
-/**
- *
- * @author PC
- */
-public class ChiTietHoaDon_Dao {
+import bus.ChiTietHoaDon_Bus;
+import entity.ChiTietHoaDon;
 
-    public boolean themCTHD(ChiTietHoaDon chiTietHoaDon) {
-        Connection conn = ConnectDB.getConnection();
-        String insertQuery = "INSERT INTO ChiTietHoaDon (soLuong, maHoaDon, maSanPham, giaBan) VALUES (?, ?, ?, ?)";
+import jakarta.persistence.*;
+
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
+public class ChiTietHoaDon_Dao extends UnicastRemoteObject implements ChiTietHoaDon_Bus {
+    private EntityManager em;
+
+    public ChiTietHoaDon_Dao() throws RemoteException {
+        em = Persistence.createEntityManagerFactory("JPA_MSSQL").createEntityManager();
+    }
+    @Override
+    public boolean themCTHD(ChiTietHoaDon chiTietHoaDon) throws RemoteException{
+        EntityTransaction tx = em.getTransaction();
         try {
-            PreparedStatement prestm = conn.prepareStatement(insertQuery);
-            prestm.setInt(1, chiTietHoaDon.getSoLuong());
-            prestm.setString(2, chiTietHoaDon.getHoaDon().getMaHoaDon());
-            prestm.setString(3, chiTietHoaDon.getSanPham().getMaSanPham());
-            prestm.setDouble(4, chiTietHoaDon.getGiaBan());
-
-            return (prestm.executeUpdate() > 0);
-        } catch (SQLException e) {
+            tx.begin();
+            em.persist(chiTietHoaDon);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            tx.rollback();
             e.printStackTrace();
         }
         return false;
     }
 
-    public ArrayList<ChiTietHoaDon> getAllCTHD() {
-        ArrayList<ChiTietHoaDon> chiTietHoaDonList = new ArrayList<>();
-        Connection conn = ConnectDB.getConnection();
-        String selectQuery = "SELECT * FROM ChiTietHoaDon";
-        try {
-            Statement stm = conn.createStatement();
-            ResultSet rs = stm.executeQuery(selectQuery);
-            while (rs.next()) {
-                int soLuong = rs.getInt("soLuong");
-                String maHoaDon = rs.getString("maHoaDon");
-                String maSanPham = rs.getString("maSanPham");
-                double giaBan = rs.getDouble("giaBan");
-                HoaDon hd = new HoaDon(maHoaDon);
-                SanPham sp = new SanPham(maSanPham);
-                // Tạo đối tượng ChiTietHoaDon và thêm vào danh sách
-                ChiTietHoaDon chiTietHoaDon = new ChiTietHoaDon(soLuong, hd, sp, giaBan);
-                chiTietHoaDonList.add(chiTietHoaDon);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return chiTietHoaDonList;
+    @Override
+    public List<ChiTietHoaDon> getAllCTHD() throws RemoteException{
+        return em.createNamedQuery("ChiTietHoaDon.getAllCTHD", ChiTietHoaDon.class).getResultList();
     }
-
-    public ArrayList<ChiTietHoaDon> getChiTietByMaHD(String maHoaDon) {
-        ArrayList<ChiTietHoaDon> chiTietHoaDonList = new ArrayList<>();
-        Connection conn = ConnectDB.getConnection();
-        String selectQuery = "SELECT * FROM ChiTietHoaDon WHERE maHoaDon = ?";
-        try {
-            PreparedStatement prestm = conn.prepareStatement(selectQuery);
-            prestm.setString(1, maHoaDon);
-
-            ResultSet rs = prestm.executeQuery();
-            while (rs.next()) {
-                int soLuong = rs.getInt("soLuong");
-                String maSanPham = rs.getString("maSanPham");
-                double giaBan = rs.getDouble("giaBan");
-                HoaDon hd = new HoaDon(maHoaDon);
-                SanPham sp = new SanPham(maSanPham);
-                // Tạo đối tượng ChiTietHoaDon và thêm vào danh sách
-                ChiTietHoaDon chiTietHoaDon = new ChiTietHoaDon(soLuong, hd, sp, giaBan);
-                chiTietHoaDonList.add(chiTietHoaDon);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return chiTietHoaDonList;
+    @Override
+    public List<ChiTietHoaDon> getChiTietByMa(String maHoaDon) throws RemoteException{
+        return em.createNamedQuery("ChiTietHoaDon.getChiTietByMaHD", ChiTietHoaDon.class).setParameter("maHoaDon", maHoaDon).getResultList();
     }
-
-    public double getTongTienHoaDon(String maHD) throws SQLException {
-        String query = "SELECT MaHoaDon, SUM(GiaBan * SoLuong) as TongTien FROM ChiTietHoaDon WHERE MaHoaDon = ? GROUP BY MaHoaDon";
-        Connection conn = ConnectDB.getConnection();
-        PreparedStatement preparedStatement = conn.prepareStatement(query);
-        preparedStatement.setString(1, maHD);
-        ResultSet rs = preparedStatement.executeQuery();
-        while (rs.next()) {
-            return rs.getDouble("TongTien");
-        }
-        return 0;
+    @Override
+    public double getTongTienHoaDon(String maHD)throws RemoteException{
+        return em.createNamedQuery("ChiTietHoaDon.getTongTienHoaDon", Double.class).setParameter("maHoaDon", maHD).getSingleResult();
     }
+    @Override
+    public List<Object[]> getSpBanChay(int limit, Date date, Date fromDate, Date endDate)throws RemoteException{
+        String jpql = "SELECT cthd.sanPham.maSanPham, SUM(cthd.giaBan * cthd.soLuong) FROM ChiTietHoaDon cthd JOIN cthd.hoaDon hd ";
 
-    public ArrayList<Object[]> getTopSanPhamBanChay(int limit, Date date, Date fromDate, Date endDate) throws SQLException {
-        ArrayList<Object[]> obj = new ArrayList<>();
-        String query = "SELECT TOP (?) MaSanPham, SUM(GiaBan * SoLuong) as TongTien FROM ChiTietHoaDon cthd JOIN HoaDon hd ON cthd.MaHoaDon = hd.MaHoaDon"
-                + " GROUP BY MaSanPham ORDER BY SUM(GiaBan * SoLuong) DESC";
         if (date != null && fromDate == null) {
-            query = "SELECT TOP (?) MaSanPham, SUM(GiaBan * SoLuong) as TongTien FROM ChiTietHoaDon cthd JOIN HoaDon hd ON cthd.MaHoaDon = hd.MaHoaDon"
-                    + " WHERE ngayLap = ?"
-                    + " GROUP BY MaSanPham ORDER BY SUM(GiaBan * SoLuong) DESC";
-        } else if (fromDate != null) {
-            query = "SELECT TOP (?) MaSanPham, SUM(GiaBan * SoLuong) as TongTien FROM ChiTietHoaDon cthd JOIN HoaDon hd ON cthd.MaHoaDon = hd.MaHoaDon"
-                    + " WHERE ngayLap BETWEEN ? AND ?"
-                    + "GROUP BY MaSanPham ORDER BY SUM(GiaBan * SoLuong) DESC";
+            jpql += "WHERE hd.ngayLap = :date ";
         }
-        Connection conn = ConnectDB.getConnection();
-        PreparedStatement preparedStatement = conn.prepareStatement(query);
+        if (fromDate != null) {
+            jpql += "WHERE hd.ngayLap BETWEEN :fromDate AND :endDate ";
+        }
 
-        preparedStatement.setInt(1, limit);
-        if (date != null && fromDate == null) {
-            preparedStatement.setDate(2, (java.sql.Date) date);
-        } else if (fromDate != null) {
-            preparedStatement.setDate(2, (java.sql.Date) fromDate);
-            preparedStatement.setDate(3, (java.sql.Date) endDate);
+        jpql += "GROUP BY cthd.sanPham.maSanPham " +
+                "ORDER BY SUM(cthd.giaBan * cthd.soLuong) DESC";
+        TypedQuery<Object[]> typedQuery = em.createQuery(jpql, Object[].class);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        if (date != null) {
+            date=new Date(date.getYear()-1900, date.getMonth()-1, date.getDate());
+            LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            localDate.format(formatter);
+            typedQuery.setParameter("date", java.sql.Date.valueOf(localDate));
         }
-        ResultSet rs = preparedStatement.executeQuery();
-        while (rs.next()) {
-            obj.add(new Object[]{rs.getString("MaSanPham"), rs.getDouble("TongTien")});
-        }
-        return obj;
+        if (fromDate != null && endDate != null) {
+            fromDate=new Date(fromDate.getYear()-1900, fromDate.getMonth()-1, fromDate.getDate());
+            endDate=new Date(endDate.getYear()-1900, endDate.getMonth()-1, endDate.getDate());
+            LocalDate localFromDate = fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate localEndDate = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            localFromDate.format(formatter);
+            localEndDate.format(formatter);
+            typedQuery.setParameter("fromDate", fromDate, TemporalType.DATE);
+            typedQuery.setParameter("endDate", endDate, TemporalType.DATE);
+        };
+        typedQuery.setMaxResults(limit);
+        return typedQuery.getResultList();
     }
 }

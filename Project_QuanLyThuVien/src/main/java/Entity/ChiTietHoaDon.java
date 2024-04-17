@@ -1,9 +1,16 @@
-package Entity;
+package entity;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
-public class ChiTietHoaDon {
+@NamedQueries({
+        @NamedQuery(name = "ChiTietHoaDon.getAllCTHD", query = "select cthd from ChiTietHoaDon cthd"),
+        @NamedQuery(name = "ChiTietHoaDon.getChiTietByMaHD", query = "select cthd from ChiTietHoaDon cthd where cthd.hoaDon.maHoaDon = :maHoaDon"),
+        @NamedQuery(name = "ChiTietHoaDon.getTongTienHoaDon", query = "select sum(cthd.giaBan * cthd.soLuong) from ChiTietHoaDon cthd where cthd.hoaDon.maHoaDon = :maHoaDon")
+})
+public class ChiTietHoaDon implements Serializable {
     @Column(name = "SoLuong", columnDefinition = "int")
     private int soLuong;
 

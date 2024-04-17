@@ -2,80 +2,62 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package Dao;
+package dao;
 
-import Entity.TaiKhoan;
-import ConnectDB.ConnectDB;
-import Entity.NhanVien;
+import bus.TaiKhoan_Bus;
+import entity.TaiKhoan;
+import entity.NhanVien;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Persistence;
+
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 
-public class TaiKhoan_Dao {
+public class TaiKhoan_Dao extends UnicastRemoteObject implements TaiKhoan_Bus {
+    private EntityManager em;
 
-    public TaiKhoan_Dao() {
+    public TaiKhoan_Dao() throws RemoteException {
+        em = Persistence.createEntityManagerFactory("JPA_MSSQL").createEntityManager();
     }
 
-    public TaiKhoan getTaiKhoanByTen(String tenDn) {
-        ConnectDB.getInstance();
-        Connection con = ConnectDB.getConnection();
-        PreparedStatement stmt = null;
-        TaiKhoan tk = null;
-
-        try {
-            String sql = "SELECT * FROM TaiKhoan WHERE TenTaiKhoan = ?";
-            stmt = con.prepareStatement(sql);
-            stmt.setString(1, tenDn);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                String tenDN = rs.getString("TenTaiKhoan");
-                String matKhau = rs.getString("MatKhau");
-                String maNV = rs.getString("MaNhanVien");
-                String role = rs.getString("Role");
-
-                tk = new TaiKhoan(tenDN, matKhau, new NhanVien(maNV), role);
-
-            }
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-
-        }
-        return tk;
+    @Override
+    public TaiKhoan getTaiKhoanByTen(String tenDn) throws RemoteException {
+        return (TaiKhoan) em.createNamedQuery("TaiKhoan.findByTenTaiKhoan").setParameter("tenTaiKhoan", tenDn).getSingleResult();
     }
 
-    public boolean themTaiKhoan(NhanVien nv) {
-        Connection conn = ConnectDB.getConnection();
-        String insertQuery = "INSERT INTO TaiKhoan (TenTaiKhoan, MatKhau, MaNhanVien, Role) VALUES (?, ?, ?, ?)";
+    @Override
+    public boolean themTaiKhoan(NhanVien nv) throws RemoteException{
+        EntityTransaction tx = em.getTransaction();
         try {
-            PreparedStatement prestm = conn.prepareStatement(insertQuery);
-            prestm.setString(1, nv.getSoDienThoai());
-            prestm.setString(2, "11111111");
-            prestm.setString(3, nv.getMaNhanVien());
-            if (nv.getChucVu() == 0) {
-                prestm.setString(4, "BH");
-            } else {
-                prestm.setString(4, "QL");
-            }
-
-            return (prestm.executeUpdate() > 0);
-        } catch (SQLException e) {
+            tx.begin();
+            TaiKhoan tk = new TaiKhoan(nv.getSoDienThoai(), "11111111", nv, nv.getChucVu() == 0 ? "BH" : "QL");
+            em.persist(tk);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            tx.rollback();
             e.printStackTrace();
         }
         return false;
     }
 
-    public boolean updateMatKhau(String tenTaiKhoan, String matKhau) {
-        Connection conn = ConnectDB.getConnection();
-        String insertQuery = "UPDATE TaiKhoan SET MatKhau = ? WHERE TenTaiKhoan = ?";
+    @Override
+    public boolean updateMatKhau(String tenTaiKhoan, String matKhau) throws RemoteException{
+        EntityTransaction tx = em.getTransaction();
         try {
-            PreparedStatement prestm = conn.prepareStatement(insertQuery);
-            prestm.setString(1, matKhau);
-            prestm.setString(2, tenTaiKhoan);
-
-            return (prestm.executeUpdate() > 0);
-        } catch (SQLException e) {
+            tx.begin();
+            TaiKhoan tk = em.find(TaiKhoan.class, tenTaiKhoan);
+            tk.setMatKhau(matKhau);
+            em.merge(tk);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            tx.rollback();
             e.printStackTrace();
         }
         return false;
